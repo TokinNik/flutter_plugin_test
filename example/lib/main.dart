@@ -20,6 +20,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   int _tapCount = 0;
+  int _cacheControlMode = 0;
+  bool _progressIndicatorOffset = true;
 
   @override
   void initState() {
@@ -47,6 +49,25 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<void> getTapsCount() async {
+    int tapCount;
+    print("===============================");
+    try {
+      tapCount = await FlutterPluginTest.getTapCount(_cacheControlMode);
+      print("2!!!!!!!!!!!!!!!!!!_$tapCount");
+    } catch (e) {
+      tapCount = -1;
+      print("3!!!!!!!!!!!!!!!!!!_$e");
+    }
+    if (!mounted) return;
+
+    setState(() {
+      _progressIndicatorOffset = true;
+      _tapCount = tapCount;
+      print("1!!!!!!!!!!!!!!!!!!_$_tapCount");
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -59,19 +80,67 @@ class _MyAppState extends State<MyApp> {
             children: [
               Text('Running on: $_platformVersion\n'),
               FlatButton(
+                color: Colors.lightBlueAccent,
                 onPressed: () {
-                    FlutterPluginTest.getTapCount.then((value) {
-                      _tapCount = value;
-                      setState(() {});
-                    });
-
-                  },
-                child: Text("Get Tap Count = $_tapCount"),)
+                  setState(() {
+                    _progressIndicatorOffset = false;
+                  });
+                  getTapsCount();
+                },
+                child: Text("Get Tap Count = $_tapCount"),
+              ),
+              new Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  new Radio(
+                    value: 0,
+                    groupValue: _cacheControlMode,
+                    onChanged: (value) {
+                      setState(() {
+                        _cacheControlMode = 0;
+                      });
+                    },
+                  ),
+                  new Text(
+                    'Default',
+                  ),
+                  new Radio(
+                    value: 1,
+                    groupValue: _cacheControlMode,
+                    onChanged: (value) {
+                      setState(() {
+                        _cacheControlMode = 1;
+                      });
+                    },
+                  ),
+                  new Text(
+                    'Max age',
+                  ),
+                  new Radio(
+                    value: 2,
+                    groupValue: _cacheControlMode,
+                    onChanged: (value) {
+                      setState(() {
+                        _cacheControlMode = 2;
+                      });
+                    },
+                  ),
+                  new Text(
+                    'No cache',
+                  ),
+                ],
+              ),
+              Offstage(
+                offstage: _progressIndicatorOffset,
+                child: CircularProgressIndicator(),
+              )
             ],
           ),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () { FlutterPluginTest.tapButton; },
+          onPressed: () {
+            FlutterPluginTest.tapButton;
+          },
           child: Text("Tap"),
         ),
       ),
