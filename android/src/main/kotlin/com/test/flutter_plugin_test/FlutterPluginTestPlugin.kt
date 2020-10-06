@@ -52,6 +52,9 @@ class FlutterPluginTestPlugin : FlutterPlugin, MethodCallHandler, ActivityAware 
             "getPlatformVersion" -> {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
+            "getError" -> {
+                result.error("error_code", "error_message", "error_details")
+            }
             "initPlugin" -> {
                 initMetrica()
             }

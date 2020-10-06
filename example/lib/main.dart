@@ -19,6 +19,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  String _errorMessage = 'none';
   int _tapCount = 0;
   int _cacheControlMode = 0;
   bool _progressIndicatorOffset = true;
@@ -49,22 +50,34 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<void> getError() async {
+    String data;
+    try {
+      data = await FlutterPluginTest.getError;
+    } on PlatformException catch (e) {
+      data = "| ${e.code} |\n| ${e.message} |\n| ${e.details} |";
+      print(data);
+    }
+    if (!mounted) return;
+    print(data);
+    setState(() {
+      _errorMessage = data;
+    });
+  }
+
   Future<void> getTapsCount() async {
     int tapCount;
-    print("===============================");
     try {
       tapCount = await FlutterPluginTest.getTapCount(_cacheControlMode);
-      print("2!!!!!!!!!!!!!!!!!!_$tapCount");
-    } catch (e) {
+    } on PlatformException catch (e) {
       tapCount = -1;
-      print("3!!!!!!!!!!!!!!!!!!_$e");
+      _errorMessage = "| ${e.code} |\n| ${e.message} |\n| ${e.details} |";
     }
     if (!mounted) return;
 
     setState(() {
       _progressIndicatorOffset = true;
       _tapCount = tapCount;
-      print("1!!!!!!!!!!!!!!!!!!_$_tapCount");
     });
   }
 
@@ -89,6 +102,14 @@ class _MyAppState extends State<MyApp> {
                 },
                 child: Text("Get Tap Count = $_tapCount"),
               ),
+              FlatButton(
+                color: Colors.redAccent,
+                onPressed: () {
+                  getError();
+                },
+                child: Text("Get Error"),
+              ),
+              Text('Error is: $_errorMessage\n'),
               new Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[

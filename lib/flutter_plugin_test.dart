@@ -15,6 +15,11 @@ class FlutterPluginTest {
     return version;
   }
 
+  static Future<String> get getError async {
+    final String data = await _channel.invokeMethod('getError');
+    return data;
+  }
+
   static get initPlugin async {
     await _channel.invokeMethod('initPlugin');
   }
